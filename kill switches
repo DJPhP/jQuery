@@ -1,0 +1,98 @@
+//html
+"<div id='div_sure_kill_".$row['id']."'>
+	<label for='sure_kill_".$row['id']."'>Are you sure?</label>
+	<select name='sure_kill_".$row['id']."' id='sure_kill_".$row['id']."'>
+		<option value='yes'>Yes</option>
+		<option value='no'>No</option>
+	</select>
+	<ul id='ul_kill_".$row['id']."'></ul>
+</div>"
+
+//css
+<link rel="stylesheet" href="./css/jquery_ui.css" rel = "stylesheet" type = "text/css"/>
+<link href = "./css/jquery.switch.css" rel = "stylesheet" type = "text/css"/>
+
+//jQuery
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="./js/jquery.switch.js"></script>
+	//kill record
+		function kill(r){
+			var k = r.attr('id');
+			var kId = k.split('_');
+			if($("#"+k).val()=="yes"){
+				var ltrOfInt= $("#letter_of_intent_status_"+kId[2]).text().toLowerCase();
+				var authStat= $("#return_authorization_status_"+kId[2]).text().toLowerCase();
+				var confMsg;
+				if(ltrOfInt=="n"||authStat =="n"){
+					confMsg = "The";
+					switch (true){
+						case ltrOfInt == "n":
+							confMsg+=" Letter of Intent";
+							if(authStat=="n"){
+								confMsg+=" and the Return Authorization";
+							}
+						break;
+						case authStat == "n":
+							confMsg+=" Return Authorization";
+						break;
+					}
+					if(ltrOfInt=="n" && authStat=="n"){
+						confMsg+=" have";
+					}else{
+						confMsg+=" has";
+					}
+					confMsg += " not been submitted yet. Do you still want to kill this record?";
+					$("#confirm").text(confMsg);
+					$( "#dialog-confirm" ).dialog({
+						resizable: false,
+						height:240,
+						width:600,
+						modal: true,
+						buttons: {
+							"Kill it!": function(e) {
+							$( this ).dialog( "close" );
+								e.preventDefault();
+								var $switch = $('#sure_kill_'+kId[2]).data('switch'),
+								controls = $switch.data('controls');
+								controls["off"]();
+								if($("#"+k).val()=="yes"){
+									//ajax killa
+									$.ajax({
+										type: "POST",
+										url: "rtl.php",
+										data: {o:"k",d:k}
+									})
+									.done(function( msg ) {
+										var m = msg.split("||");
+										r2nKill(m[1]);
+										alert("Data_"+m[1]+" Saved: " +m[0]);
+										return;
+									});
+								}
+							},
+							Cancel: function(e) {
+							  $( this ).dialog( "close" );
+								e.preventDefault();
+								var $switch = $('#sure_kill_'+kId[2]).data('switch'),
+								controls = $switch.data('controls');
+								controls["off"]();
+							}
+						}
+					});
+				}else{
+					//ajax killa
+					$.ajax({
+						type: "POST",
+						url: "rtl.php",
+						data: {o:"k",d:k}
+					})
+					.done(function( msg ) {
+						var m = msg.split("||");
+						r2nKill(m[1]);
+						// alert("Data_"+m[1]+" Saved: " +m[0]);
+						return;
+					});
+				}
+			}
+		}
