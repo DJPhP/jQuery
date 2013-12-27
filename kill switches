@@ -96,3 +96,49 @@
 				}
 			}
 		}
+//on document ready
+$(document).ready(function(){	
+$("[id^=sure_kill_]").each(function(){
+	var sKillId=$(this).attr('id');
+	var sKillSId=sKillId.split("_");
+	var key = sKillSId.length-1;
+	$("#sure_kill_"+sKillSId[key]).switchify(false);
+	$("#div_sure_kill_"+sKillSId[key]).hide();
+	$("#sure_kill_"+sKillSId[key]).data('switch').bind('slide', function(e, type) {
+		$("#ul_kill_"+sKillSId[key]).append('<li>Switching ' + type); 
+	});
+});
+//allow users to click on a TD in order to update the information
+$("[id^=kill_]").click(function(){
+	var killId=$(this).attr('id');
+	var killTd=killId.split("_");
+	var key = killTd.length-1;
+	$(this).css("display","none");
+	$("#div_sure_kill_"+killTd[key]).fadeIn();
+	$("#sure_kill_"+killTd[key]).focus();
+	$("#sure_kill_"+killTd[key]).focusout(function(){
+		r2nKill(killTd[key]);
+	});
+});
+$(":not([id^=td_kill]_)").click(function(){
+	var recordId=$(this).attr('id');
+	if(typeof recordId !== "undefined"){
+		var recordTd=recordId.split("_");
+		var key=recordTd.length-1;
+		switch (recordId){
+			case "kill_"+recordTd[key]:
+			case "td_kill_"+recordTd[key]:
+			case "div_sure_kill_"+recordTd[key]:
+			case "sure_kill_"+recordTd[key]:
+			case "ul_kill_"+recordTd[key]:
+			case "leaseReturnMain":
+				return;
+			break;
+			default:
+				r2nKill(recordTd[key]);
+			break;
+		}
+	}else{
+		return;
+	}
+});
